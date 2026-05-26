@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A little secret 🐾</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #fff0f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  #landing { text-align: center; padding: 2rem 1rem; cursor: pointer; user-select: none; }
+  .link-text {
+    font-size: 20px;
+    color: #d4537e;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    display: inline-block;
+    transition: opacity 0.2s;
+  }
+  .link-text:hover { opacity: 0.7; }
+  .hint { font-size: 13px; color: #aaa; margin-top: 8px; }
+
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 999;
+  }
+  #modal-overlay.active { display: flex; }
+
+  #card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #f4c0d1;
+    padding: 2rem 2.5rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(212,83,126,0.12);
+  }
+
+  #cat-gif {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f4c0d1;
+    margin-bottom: 1.5rem;
+  }
+
+  .ask-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  .sub-text {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-row { display: flex; gap: 12px; justify-content: center; }
+  .btn-yes, .btn-no {
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s, opacity 0.2s;
+    border: none;
+  }
+  .btn-yes:active, .btn-no:active { transform: scale(0.97); }
+  .btn-yes { background: #d4537e; color: #fff; }
+  .btn-yes:hover { background: #b8406a; }
+  .btn-no { background: #f0f0f0; color: #666; }
+  .btn-no:hover { background: #e0e0e0; }
+
+  #date-picker-section { display: none; margin-top: 1.5rem; }
+  #date-picker-section.active { display: block; }
+  .picker-label { font-size: 14px; color: #888; margin-bottom: 8px; }
+
+  .date-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .date-opt {
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 1px solid #f4c0d1;
+    background: #fff0f5;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: center;
+  }
+  .date-opt:hover { background: #fbeaf0; border-color: #d4537e; color: #993556; }
+  .date-opt.selected { background: #f4c0d1; border-color: #d4537e; color: #72243e; font-weight: 600; }
+
+  #confirm-btn {
+    margin-top: 1rem;
+    padding: 10px 32px;
+    border-radius: 10px;
+    background: #d4537e;
+    color: #fff;
+    border: none;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    display: none;
+    transition: opacity 0.2s;
+  }
+  #confirm-btn:hover { opacity: 0.85; }
+
+  #response-section { display: none; }
+  #response-section.active { display: block; }
+  .response-text {
+    font-size: 17px;
+    color: #333;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  #no-section { display: none; }
+  #no-section.active { display: block; margin-top: 1rem; }
+  .no-emoji { font-size: 52px; line-height: 1.3; display: block; }
+  .no-text { font-size: 15px; color: #888; margin-top: 0.5rem; }
+
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .close-btn:hover { color: #888; }
+</style>
+</head>
+<body>
+
+<div id="landing" onclick="openModal()">
+  <span class="link-text">🐾 Click me, I have a little secret...</span>
+  <p class="hint">go on, click it</p>
+</div>
+
+<div id="modal-overlay">
+  <div id="card">
+    <button class="close-btn" onclick="closeModal()" aria-label="Close">✕</button>
+
+    <div id="initial-view">
+      <img id="cat-gif" src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="cute cat" />
+      <p class="ask-text">Will you go on a date with me? 🐱</p>
+      <p class="sub-text">The cat demands an answer...</p>
+      <div class="btn-row">
+        <button class="btn-yes" onclick="sayYes()">Yes! 💕</button>
+        <button class="btn-no" onclick="sayNo()">No 😿</button>
+      </div>
+
+      <div id="date-picker-section">
+        <p class="picker-label">Yay! Pick a date:</p>
+        <div class="date-options">
+          <button class="date-opt" onclick="pickDate(this, 'This weekend')">This weekend</button>
+          <button class="date-opt" onclick="pickDate(this, 'Next Saturday')">Next Saturday</button>
+          <button class="date-opt" onclick="pickDate(this, 'A cozy Monday')">A cozy Monday</button>
+          <button class="date-opt" onclick="pickDate(this, 'Surprise me!')">Surprise me!</button>
+        </div>
+        <button id="confirm-btn" onclick="confirmDate()">Confirm our date! 🐾</button>
+      </div>
+    </div>
+
+    <div id="response-section">
+      <img src="https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif" alt="happy cat" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:3px solid #f4c0d1;margin-bottom:1rem;" />
+      <p class="response-text" id="response-msg"></p>
+    </div>
+
+    <div id="no-section">
+      <span class="no-emoji">🌍✈️💍</span>
+      <p class="no-text">Hmm... maybe a longer trip then?<br>The cat thinks it's still a yes.</p>
+      <img src="https://media.giphy.com/media/3oriO13KTkzPwTykp2/giphy.gif" alt="persistent cat" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #f4c0d1;margin-top:1rem;" />
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let selectedDate = null;
+
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    reset();
+  }
+
+  function sayYes() {
+    document.getElementById('date-picker-section').classList.add('active');
+  }
+
+  function sayNo() {
+    document.getElementById('initial-view').style.display = 'none';
+    document.getElementById('no-section').classList.add('active');
+  }
+
+  function pickDate(el, label) {
+    document.querySelectorAll('.date-opt').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDate = label;
+    document.getElementById('confirm-btn').style.display = 'inline-block';
+  }
+
+  function confirmDate() {
+    document.getElementById('initial-view').style.display = 'none';
+    document.getElementById('response-section').classList.add('active');
+    const msgs = {
+      'This weekend': "This weekend it is! The cat is already picking an outfit. See you soon! 🐾💕",
+      'Next Saturday': "Next Saturday — marked with a paw print on the calendar! Can't wait! 🐱🌟",
+      'A cozy Monday': "A cozy Monday date? The cat approves. Mondays just got better! ☕🐾",
+      'Surprise me!': "Ooh, spontaneous! The cat LOVES that energy. Get ready for adventure! 🎉🐱"
+    };
+    document.getElementById('response-msg').textContent = msgs[selectedDate] || "It's a date! 🐾💕";
+  }
+
+  function reset() {
+    selectedDate = null;
+    document.getElementById('initial-view').style.display = 'block';
+    document.getElementById('date-picker-section').classList.remove('active');
+    document.getElementById('response-section').classList.remove('active');
+    document.getElementById('no-section').classList.remove('active');
+    document.getElementById('confirm-btn').style.display = 'none';
+    document.querySelectorAll('.date-opt').forEach(b => b.classList.remove('selected'));
+  }
+</script>
+</body>
+</html>
