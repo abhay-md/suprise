@@ -53,7 +53,11 @@
     box-shadow: 0 8px 32px rgba(212,83,126,0.12);
   }
 
-  #cat-gif {
+  .step { display: none; }
+  .step.active { display: block; animation: pop 0.3s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  .cat-img {
     width: 180px;
     height: 180px;
     border-radius: 50%;
@@ -74,6 +78,26 @@
     margin-bottom: 1.5rem;
   }
 
+  .name-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #f4c0d1;
+    font-size: 16px;
+    font-family: inherit;
+    text-align: center;
+    margin-bottom: 1rem;
+    outline: none;
+  }
+  .name-input:focus { border-color: #d4537e; }
+
+  .big-answer {
+    font-size: 30px;
+    font-weight: 700;
+    color: #d4537e;
+    margin: 0.5rem 0 1.5rem;
+  }
+
   .btn-row { display: flex; gap: 12px; justify-content: center; }
   .btn-yes, .btn-no {
     padding: 10px 28px;
@@ -89,6 +113,7 @@
   .btn-yes:hover { background: #b8406a; }
   .btn-no { background: #f0f0f0; color: #666; }
   .btn-no:hover { background: #e0e0e0; }
+  .btn-no.dodging { position: fixed; z-index: 1000; transition: left 0.25s ease-out, top 0.25s ease-out; }
 
   #date-picker-section { display: none; margin-top: 1.5rem; }
   #date-picker-section.active { display: block; }
@@ -130,19 +155,32 @@
   }
   #confirm-btn:hover { opacity: 0.85; }
 
-  #response-section { display: none; }
-  #response-section.active { display: block; }
+  .cake-logo {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 3px solid #f4c0d1;
+    background: #fff0f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .bday-text {
+    font-size: 26px;
+    font-weight: 700;
+    color: #d4537e;
+  }
+
   .response-text {
     font-size: 17px;
     color: #333;
     line-height: 1.6;
     margin-top: 1rem;
   }
-
-  #no-section { display: none; }
-  #no-section.active { display: block; margin-top: 1rem; }
-  .no-emoji { font-size: 52px; line-height: 1.3; display: block; }
-  .no-text { font-size: 15px; color: #888; margin-top: 0.5rem; }
 
   .close-btn {
     position: absolute;
@@ -168,13 +206,42 @@
   <div id="card">
     <button class="close-btn" onclick="closeModal()" aria-label="Close">✕</button>
 
-    <div id="initial-view">
-      <img id="cat-gif" src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="cute cat" />
+    <!-- Step 1: name -->
+    <div class="step" id="step-name">
+      <img class="cat-img" src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="cute cat" />
+      <p class="ask-text">What is your name? 🐱</p>
+      <p class="sub-text">The cat wants to know...</p>
+      <input class="name-input" id="name-input" type="text" placeholder="Type your name" />
+      <button class="btn-yes" onclick="submitName()">Next 🐾</button>
+    </div>
+
+    <!-- Step 2: most beautiful girl -->
+    <div class="step" id="step-beautiful">
+      <p class="ask-text">Who is the most beautiful girl? 💖</p>
+      <p class="sub-text">The cat already knows the answer...</p>
+      <p class="big-answer"><span class="name-slot"></span>! 😍</p>
+      <button class="btn-yes" onclick="showStep('step-abhay')">Next 🐾</button>
+    </div>
+
+    <!-- Step 3: do you like Abhay -->
+    <div class="step" id="step-abhay">
+      <img class="cat-img" src="https://media.giphy.com/media/3oriO13KTkzPwTykp2/giphy.gif" alt="curious cat" />
+      <p class="ask-text">Do you like Abhay, <span class="name-slot"></span>? 🥺</p>
+      <p class="sub-text">Choose wisely...</p>
+      <div class="btn-row">
+        <button class="btn-yes" onclick="showStep('step-date')">Yes! 💕</button>
+        <button class="btn-no">No 😿</button>
+      </div>
+    </div>
+
+    <!-- Step 4: date -->
+    <div class="step" id="step-date">
+      <img class="cat-img" src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" alt="cute cat" />
       <p class="ask-text">Will you go on a date with me? 🐱</p>
       <p class="sub-text">The cat demands an answer...</p>
       <div class="btn-row">
         <button class="btn-yes" onclick="sayYes()">Yes! 💕</button>
-        <button class="btn-no" onclick="sayNo()">No 😿</button>
+        <button class="btn-no">No 😿</button>
       </div>
 
       <div id="date-picker-section">
@@ -189,15 +256,11 @@
       </div>
     </div>
 
-    <div id="response-section">
-      <img src="https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif" alt="happy cat" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:3px solid #f4c0d1;margin-bottom:1rem;" />
+    <!-- Step 5: final response -->
+    <div class="step" id="step-response">
+      <div class="cake-logo">🎂</div>
+      <p class="bday-text">Happy Birthday<span id="bday-name"></span>! 🎉</p>
       <p class="response-text" id="response-msg"></p>
-    </div>
-
-    <div id="no-section">
-      <span class="no-emoji">🌍✈️💍</span>
-      <p class="no-text">Hmm... maybe a longer trip then?<br>The cat thinks it's still a yes.</p>
-      <img src="https://media.giphy.com/media/3oriO13KTkzPwTykp2/giphy.gif" alt="persistent cat" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #f4c0d1;margin-top:1rem;" />
     </div>
 
   </div>
@@ -205,9 +268,12 @@
 
 <script>
   let selectedDate = null;
+  let userName = '';
 
   function openModal() {
     document.getElementById('modal-overlay').classList.add('active');
+    showStep('step-name');
+    document.getElementById('name-input').focus();
   }
 
   function closeModal() {
@@ -215,13 +281,25 @@
     reset();
   }
 
-  function sayYes() {
-    document.getElementById('date-picker-section').classList.add('active');
+  function showStep(id) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    resetNoButtons();
+    document.getElementById(id).classList.add('active');
   }
 
-  function sayNo() {
-    document.getElementById('initial-view').style.display = 'none';
-    document.getElementById('no-section').classList.add('active');
+  function submitName() {
+    const input = document.getElementById('name-input');
+    userName = input.value.trim();
+    if (!userName) { input.focus(); input.placeholder = 'Please tell the cat your name 🥺'; return; }
+    document.querySelectorAll('.name-slot').forEach(s => s.textContent = userName);
+    showStep('step-beautiful');
+  }
+  document.getElementById('name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitName();
+  });
+
+  function sayYes() {
+    document.getElementById('date-picker-section').classList.add('active');
   }
 
   function pickDate(el, label) {
@@ -232,23 +310,80 @@
   }
 
   function confirmDate() {
-    document.getElementById('initial-view').style.display = 'none';
-    document.getElementById('response-section').classList.add('active');
+    showStep('step-response');
     const msgs = {
       'This weekend': "This weekend it is! The cat is already picking an outfit. See you soon! 🐾💕",
       'Next Saturday': "Next Saturday — marked with a paw print on the calendar! Can't wait! 🐱🌟",
       'A cozy Monday': "A cozy Monday date? The cat approves. Mondays just got better! ☕🐾",
       'Surprise me!': "Ooh, spontaneous! The cat LOVES that energy. Get ready for adventure! 🎉🐱"
     };
+    document.getElementById('bday-name').textContent = userName ? `, ${userName}` : '';
     document.getElementById('response-msg').textContent = msgs[selectedDate] || "It's a date! 🐾💕";
+  }
+
+  // Every "No" button runs away from the cursor so it can never be clicked
+  const noBtns = document.querySelectorAll('.btn-no');
+
+  function dodge(btn, cx, cy) {
+    const r = btn.getBoundingClientRect();
+    const margin = 16;
+    const maxX = window.innerWidth - r.width - margin;
+    const maxY = window.innerHeight - r.height - margin;
+    let x, y, tries = 0;
+    do {
+      x = margin + Math.random() * (maxX - margin);
+      y = margin + Math.random() * (maxY - margin);
+      tries++;
+    } while (Math.hypot(x + r.width / 2 - cx, y + r.height / 2 - cy) < 300 && tries < 50);
+    if (!btn.classList.contains('dodging')) {
+      // pin it where it is first, so the jump animates from its current spot
+      btn.style.left = r.left + 'px';
+      btn.style.top = r.top + 'px';
+      btn.classList.add('dodging');
+      btn.offsetWidth;
+    }
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+  }
+
+  document.addEventListener('mousemove', e => {
+    if (!document.getElementById('modal-overlay').classList.contains('active')) return;
+    noBtns.forEach(btn => {
+      if (!btn.closest('.step').classList.contains('active')) return; // hidden step
+      const r = btn.getBoundingClientRect();
+      // distance from the cursor to the nearest edge of the button
+      const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+      const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+      if (Math.hypot(dx, dy) < 120) dodge(btn, e.clientX, e.clientY);
+    });
+  });
+  noBtns.forEach(btn => {
+    btn.addEventListener('mouseenter', e => dodge(btn, e.clientX, e.clientY));
+    btn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      dodge(btn, t.clientX, t.clientY);
+    }, { passive: false });
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      dodge(btn, e.clientX, e.clientY);
+    });
+  });
+
+  function resetNoButtons() {
+    noBtns.forEach(btn => {
+      btn.classList.remove('dodging');
+      btn.style.left = btn.style.top = '';
+    });
   }
 
   function reset() {
     selectedDate = null;
-    document.getElementById('initial-view').style.display = 'block';
+    userName = '';
+    document.getElementById('name-input').value = '';
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    resetNoButtons();
     document.getElementById('date-picker-section').classList.remove('active');
-    document.getElementById('response-section').classList.remove('active');
-    document.getElementById('no-section').classList.remove('active');
     document.getElementById('confirm-btn').style.display = 'none';
     document.querySelectorAll('.date-opt').forEach(b => b.classList.remove('selected'));
   }
